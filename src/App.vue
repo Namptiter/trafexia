@@ -72,7 +72,7 @@ const listPanelStyle = computed(() => {
   if (!hasSelectedRequest.value) {
     return { flex: '1', minWidth: '300px', overflow: 'hidden' };
   }
-  return { width: `${leftPanelWidth.value}%`, minWidth: '200px', maxWidth: '80%', overflow: 'hidden', flexShrink: 0 }; // Use width, not flex
+  return { width: `${leftPanelWidth.value}%`, minWidth: '200px', maxWidth: '80%', overflow: 'hidden' }; // Use width, not flex
 });
 
 function startResize() {
@@ -114,20 +114,13 @@ function clearRequests() {
 
     <!-- Header -->
     <header class="app-header"
-      style="height: 50px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: #161b22; border-bottom: 1px solid #30363d; z-index: 50;">
-      <div style="display: flex; align-items: center; gap: 12px; height: 100%;">
-        <div
-          style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #238636 0%, #2ea043 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(35, 134, 54, 0.4);">
-          <img src="@/public/logo.png" alt="Trafexia" style="width: 20px; height: 20px; object-fit: contain;" />
-        </div>
-        <div class="app-title">
-          <h1
-            style="font-size: 18px; font-weight: 700; background: linear-gradient(90deg, #fff 0%, #e6edf3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; margin: 0;">
-            Trafexia</h1>
-          <span
-            style="font-size: 10px; color: #8b949e; font-weight: 500; letter-spacing: 0.5px; background: rgba(110, 118, 129, 0.1); padding: 2px 6px; border-radius: 12px; border: 1px solid rgba(110, 118, 129, 0.2);">BETA</span>
-        </div>
+      style="height: 56px; display: flex; align-items: center; padding: 0 16px; gap: 16px; background: #161b22; border-bottom: 1px solid rgba(48, 54, 61, 0.8);">
+      <!-- Logo -->
+      <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+        <Network style="width: 24px; height: 24px; color: #58a6ff;" />
+        <span style="font-weight: 600; font-size: 17px; color: #e6edf3; white-space: nowrap;">Trafexia</span>
       </div>
+
       <!-- Proxy Control -->
       <ProxyControl />
 

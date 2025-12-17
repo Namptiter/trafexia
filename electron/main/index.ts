@@ -20,10 +20,8 @@ app.disableHardwareAcceleration();
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 1200,
-    minHeight: 800,
+    fullscreen: true,
+    resizable: true,
     title: 'Trafexia - Mobile Traffic Interceptor',
     icon: join(__dirname, '../../resources/icons/icon.png'),
     webPreferences: {
@@ -38,9 +36,8 @@ const createWindow = () => {
     show: false,
   });
 
-  // Show window when ready - maximize by default
+  // Show window when ready
   mainWindow.once('ready-to-show', () => {
-    mainWindow?.maximize();
     mainWindow?.show();
   });
 
