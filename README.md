@@ -37,7 +37,7 @@ A powerful desktop application for intercepting and analyzing HTTP/HTTPS traffic
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/trafexia.git
+git clone https://github.com/danieldev23/trafexia.git
 cd trafexia
 
 # Install dependencies

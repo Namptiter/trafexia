@@ -1,15 +1,14 @@
 import { ipcMain, BrowserWindow, shell, dialog } from 'electron';
 import * as fs from 'fs';
-import { ApkAnalyzer } from './services/ApkAnalyzer';
 import type { CertificateManager } from './services/CertificateManager';
 import type { ProxyServer } from './services/ProxyServer';
 import type { TrafficStorage } from './services/TrafficStorage';
 import type { CertServer } from './services/CertServer';
-import type { 
-  ProxyConfig, 
-  ProxyStatus, 
-  FilterOptions, 
-  CapturedRequest, 
+import type {
+  ProxyConfig,
+  ProxyStatus,
+  FilterOptions,
+  CapturedRequest,
   AppSettings,
   ExportFormat,
   HarLog,
@@ -23,12 +22,11 @@ interface Services {
   proxyServer: ProxyServer;
   trafficStorage: TrafficStorage;
   certServer: CertServer;
-  apkAnalyzer: ApkAnalyzer;
   mainWindow: () => BrowserWindow | null;
 }
 
 export function setupIpcHandlers(services: Services): void {
-  const { certificateManager, proxyServer, trafficStorage, certServer, apkAnalyzer, mainWindow } = services;
+  const { certificateManager, proxyServer, trafficStorage, certServer, mainWindow } = services;
 
   // ===== Proxy Control =====
 
@@ -136,7 +134,7 @@ export function setupIpcHandlers(services: Services): void {
   ipcMain.handle(IPC_CHANNELS.REQUESTS_EXPORT, async (_event, format: ExportFormat, ids?: number[]): Promise<string> => {
     try {
       let requests: CapturedRequest[];
-      
+
       if (ids && ids.length > 0) {
         requests = ids
           .map(id => trafficStorage.getRequestById(id))
@@ -222,13 +220,69 @@ export function setupIpcHandlers(services: Services): void {
     return getLocalIp();
   });
 
-  // ===== Tools =====
-  
-  ipcMain.handle(IPC_CHANNELS.APK_ANALYZE, async (_event, filePath: string): Promise<string[]> => {
+  // ===== Browser/Emulator =====
+
+  ipcMain.handle(IPC_CHANNELS.LAUNCH_BROWSER, async (_event, browser: 'chrome' | 'firefox' | 'edge'): Promise<boolean> => {
+    const { spawn } = await import('child_process');
+    const settings = loadSettings(trafficStorage);
+    const localIp = getLocalIp();
+    const proxyUrl = `${localIp}:${settings.proxyPort}`;
+
     try {
-      return await apkAnalyzer.analyze(filePath);
+      const platform = process.platform;
+      let command: string;
+      let args: string[];
+
+      if (browser === 'chrome') {
+        if (platform === 'darwin') {
+          command = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        } else if (platform === 'win32') {
+          command = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+        } else {
+          command = 'google-chrome';
+        }
+        args = [
+          `--proxy-server=http://${proxyUrl}`,
+          '--ignore-certificate-errors',
+          '--user-data-dir=/tmp/trafexia-chrome-profile',
+        ];
+      } else if (browser === 'firefox') {
+        // Firefox doesn't support proxy via command line easily, just open it
+        if (platform === 'darwin') {
+          command = '/Applications/Firefox.app/Contents/MacOS/firefox';
+        } else if (platform === 'win32') {
+          command = 'C:\\Program Files\\Mozilla Firefox\\firefox.exe';
+        } else {
+          command = 'firefox';
+        }
+        args = [];
+      } else if (browser === 'edge') {
+        if (platform === 'darwin') {
+          command = '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
+        } else if (platform === 'win32') {
+          command = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+        } else {
+          command = 'microsoft-edge';
+        }
+        args = [
+          `--proxy-server=http://${proxyUrl}`,
+          '--ignore-certificate-errors',
+          '--user-data-dir=/tmp/trafexia-edge-profile',
+        ];
+      } else {
+        throw new Error(`Unknown browser: ${browser}`);
+      }
+
+      spawn(command, args, {
+        detached: true,
+        stdio: 'ignore',
+        shell: platform === 'win32'
+      }).unref();
+
+      console.log(`[IPC] Launched ${browser} with proxy ${proxyUrl}`);
+      return true;
     } catch (error) {
-      console.error('[IPC] Failed to analyze APK:', error);
+      console.error('[IPC] Failed to launch browser:', error);
       throw error;
     }
   });
@@ -367,7 +421,7 @@ function exportAsPostman(requests: CapturedRequest[]): string {
     },
     item: requests.map((req) => {
       const url = new URL(req.url);
-      
+
       return {
         name: `${req.method} ${req.path}`,
         request: {

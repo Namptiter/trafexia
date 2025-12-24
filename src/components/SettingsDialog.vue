@@ -9,7 +9,11 @@ import {
   Download,
   Shield,
   Clock,
-  FileDown
+  FileDown,
+  Chrome,
+  Globe,
+  Smartphone,
+  Copy
 } from 'lucide-vue-next';
 
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -81,6 +85,51 @@ async function openCertPath() {
     summary: 'Certificate Location',
     detail: certPath,
     life: 5000,
+  });
+}
+
+// Browser/Emulator functions
+async function launchBrowser(browser: 'chrome' | 'edge') {
+  try {
+    await window.electronAPI.launchBrowser(browser);
+    toast.add({
+      severity: 'success',
+      summary: 'Browser Launched',
+      detail: `${browser === 'chrome' ? 'Chrome' : 'Edge'} launched with proxy settings`,
+      life: 3000,
+    });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Launch Failed',
+      detail: `Could not launch ${browser}. Make sure it's installed.`,
+      life: 4000,
+    });
+  }
+}
+
+async function copyAdbCommand() {
+  const localIp = await window.electronAPI.getLocalIp();
+  const port = settingsStore.settings.proxyPort;
+  const command = `adb shell settings put global http_proxy ${localIp}:${port}`;
+  
+  await navigator.clipboard.writeText(command);
+  toast.add({
+    severity: 'success',
+    summary: 'Copied!',
+    detail: 'ADB command copied to clipboard',
+    life: 2000,
+  });
+}
+
+async function copyAdbClearCommand() {
+  const command = `adb shell settings put global http_proxy :0`;
+  await navigator.clipboard.writeText(command);
+  toast.add({
+    severity: 'success',
+    summary: 'Copied!',
+    detail: 'ADB clear proxy command copied',
+    life: 2000,
   });
 }
 </script>
@@ -160,6 +209,44 @@ async function openCertPath() {
             <span class="font-medium">Export JSON</span>
             <span class="text-xs text-center text-[#8b949e]">Raw request data</span>
           </button>
+        </div>
+      </section>
+
+      <!-- Quick Connect -->
+      <section>
+        <h4 class="text-sm font-semibold text-[#e6edf3] mb-4 flex items-center gap-2">
+          <Globe class="w-4 h-4 text-purple-400" />
+          Quick Connect
+        </h4>
+
+        <!-- Browser Section -->
+        <div class="mb-4">
+          <span class="text-xs text-[#8b949e] block mb-3">Launch browser with proxy configured:</span>
+          <div class="grid grid-cols-2 gap-3">
+            <button class="action-card-sm" @click="launchBrowser('chrome')">
+              <Chrome class="w-5 h-5 text-blue-400" />
+              <span class="font-medium">Chrome</span>
+            </button>
+            <button class="action-card-sm" @click="launchBrowser('edge')">
+              <Globe class="w-5 h-5 text-cyan-400" />
+              <span class="font-medium">Edge</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Emulator Section -->
+        <div>
+          <span class="text-xs text-[#8b949e] block mb-3">Android Emulator (ADB commands):</span>
+          <div class="grid grid-cols-2 gap-3">
+            <button class="action-card-sm" @click="copyAdbCommand">
+              <Smartphone class="w-5 h-5 text-green-400" />
+              <span class="font-medium">Set Proxy</span>
+            </button>
+            <button class="action-card-sm" @click="copyAdbClearCommand">
+              <Copy class="w-5 h-5 text-orange-400" />
+              <span class="font-medium">Clear Proxy</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -287,6 +374,37 @@ section h4 {
   width: 24px !important;
   height: 24px !important;
   margin-bottom: 8px;
+}
+
+.action-card-sm {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #c9d1d9;
+}
+
+.action-card-sm:hover {
+  background: #30363d;
+  border-color: #8b949e;
+}
+
+.action-card-sm .font-medium {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.action-card-sm svg {
+  width: 20px !important;
+  height: 20px !important;
 }
 
 /* Deep/Global overrides for PrimeVue inside this component */

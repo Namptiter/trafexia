@@ -6,7 +6,6 @@ import { TrafficStorage } from './services/TrafficStorage';
 import { CertServer } from './services/CertServer';
 import { setupIpcHandlers } from './ipc-handlers';
 import { getLocalIp } from './utils/network';
-import { ApkAnalyzer } from './services/ApkAnalyzer';
 
 // Services
 let certificateManager: CertificateManager;
@@ -74,9 +73,6 @@ const initializeServices = async () => {
 
   // Initialize proxy server
   proxyServer = new ProxyServer(certificateManager, trafficStorage);
-  
-  // Initialize APK analyzer
-  const apkAnalyzer = new ApkAnalyzer();
 
   // Setup IPC handlers
   setupIpcHandlers({
@@ -84,7 +80,6 @@ const initializeServices = async () => {
     proxyServer,
     trafficStorage,
     certServer,
-    apkAnalyzer,
     mainWindow: () => mainWindow,
   });
 
@@ -114,18 +109,18 @@ app.on('window-all-closed', () => {
 // Cleanup on quit
 app.on('before-quit', async () => {
   console.log('[Main] Cleaning up before quit...');
-  
+
   try {
     // Stop proxy server
     if (proxyServer?.isRunning()) {
       await proxyServer.stop();
     }
-    
+
     // Stop cert server
     if (certServer?.isRunning()) {
       await certServer.stop();
     }
-    
+
     // Close database
     if (trafficStorage) {
       trafficStorage.close();

@@ -25,7 +25,6 @@ import RequestList from '@/components/RequestList.vue';
 import FilterPanel from '@/components/FilterPanel.vue';
 import RequestDetail from '@/components/RequestDetail.vue';
 import SettingsDialog from '@/components/SettingsDialog.vue';
-import ToolsView from '@/views/ToolsView.vue';
 
 const trafficStore = useTrafficStore();
 const proxyStore = useProxyStore();
@@ -33,7 +32,6 @@ const settingsStore = useSettingsStore();
 const toast = useToast();
 
 // State
-const currentView = ref<'interceptor' | 'tools'>('interceptor');
 const showFilters = ref(false);
 const showSettings = ref(false);
 const showQrCode = ref(false);
@@ -142,34 +140,7 @@ function exportPostman() {
         <span style="font-weight: 600; font-size: 17px; color: #e6edf3; white-space: nowrap;">Trafexia</span>
       </div>
 
-      <!-- View Switcher -->
-      <div
-        style="background: #0d1117; border: 1px solid #30363d; padding: 2px; border-radius: 6px; display: flex; gap: 2px;">
-        <button @click="currentView = 'interceptor'" :style="{
-          padding: '4px 12px',
-          borderRadius: '4px',
-          border: 'none',
-          background: currentView === 'interceptor' ? '#21262d' : 'transparent',
-          color: currentView === 'interceptor' ? '#e6edf3' : '#8b949e',
-          fontSize: '13px',
-          fontWeight: '500',
-          cursor: 'pointer'
-        }">
-          Traffic
-        </button>
-        <button @click="currentView = 'tools'" :style="{
-          padding: '4px 12px',
-          borderRadius: '4px',
-          border: 'none',
-          background: currentView === 'tools' ? '#21262d' : 'transparent',
-          color: currentView === 'tools' ? '#e6edf3' : '#8b949e',
-          fontSize: '13px',
-          fontWeight: '500',
-          cursor: 'pointer'
-        }">
-          Tools
-        </button>
-      </div>
+
 
       <!-- Proxy Control -->
       <ProxyControl />
@@ -230,13 +201,10 @@ function exportPostman() {
         <FilterPanel />
       </aside>
 
-      <!-- Tools View -->
-      <div v-if="currentView === 'tools'" style="flex: 1; overflow: hidden; background: #010409;">
-        <ToolsView />
-      </div>
 
-      <!-- Interceptor View (Main Content) -->
-      <div v-else style="flex: 1; display: flex; overflow: hidden;" ref="mainContainer">
+
+      <!-- Main Content -->
+      <div style="flex: 1; display: flex; overflow: hidden;" ref="mainContainer">
         <!-- Request List Panel -->
         <div :style="listPanelStyle">
           <RequestList />

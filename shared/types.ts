@@ -158,8 +158,8 @@ export const IPC_CHANNELS = {
   // App
   APP_GET_LOCAL_IP: 'app:get-local-ip',
 
-  // Tools
-  APK_ANALYZE: 'tools:apk-analyze',
+  // Browser/Emulator
+  LAUNCH_BROWSER: 'app:launch-browser',
 } as const;
 
 // ===== IPC Handler Types =====
@@ -188,8 +188,8 @@ export interface IpcApi {
   // App
   getLocalIp: () => Promise<string>;
 
-  // Tools
-  analyzeApk: (filePath: string) => Promise<string[]>;
+  // Browser/Emulator
+  launchBrowser: (browser: 'chrome' | 'firefox' | 'edge') => Promise<boolean>;
 
   // Events
   onRequestCaptured: (callback: (request: CapturedRequest) => void) => () => void;

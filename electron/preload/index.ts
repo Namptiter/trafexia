@@ -1,12 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { 
-  IpcApi, 
-  ProxyConfig, 
-  ProxyStatus, 
-  FilterOptions, 
-  CapturedRequest, 
+import type {
+  IpcApi,
+  ProxyConfig,
+  ProxyStatus,
+  FilterOptions,
+  CapturedRequest,
   AppSettings,
-  ExportFormat 
+  ExportFormat
 } from '../../shared/types';
 import { IPC_CHANNELS } from '../../shared/types';
 
@@ -65,9 +65,9 @@ const api: IpcApi = {
     return ipcRenderer.invoke(IPC_CHANNELS.APP_GET_LOCAL_IP);
   },
 
-  // Tools
-  analyzeApk: (filePath: string): Promise<string[]> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.APK_ANALYZE, filePath);
+  // Browser/Emulator
+  launchBrowser: (browser: 'chrome' | 'firefox' | 'edge'): Promise<boolean> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.LAUNCH_BROWSER, browser);
   },
 
   // Events
